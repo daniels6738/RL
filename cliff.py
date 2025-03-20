@@ -9,7 +9,7 @@ env = gym.make("CliffWalking-v0")
 # Hyperparameters
 alpha = 0.5  # Learning rate
 gamma = 0.99  # Discount factor
-epsilon = 0.1  # Exploration rate
+epsilon = 0.01  # Exploration rate
 n_steps = 4  # Number of steps for n-step TD-learning
 num_episodes = 5000
 
