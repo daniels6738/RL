@@ -3,17 +3,19 @@ import gymnasium as gym
 import matplotlib.pyplot as plt
 from collections import deque
 
-# Create the environment
-env = gym.make("CliffWalking-v0")
+# Create the FrozenLake environment
+env = gym.make("FrozenLake-v1", is_slippery=True, render_mode=None)
 
 # Hyperparameters
-alpha = 0.5  # Learning rate
+alpha = 0.1  # Learning rate
 gamma = 0.99  # Discount factor
-epsilon = 0.01  # Exploration rate
+epsilon = 1.0  # Initial exploration rate
+epsilon_min = 0.01  # Minimum exploration rate
+epsilon_decay = 0.995  # Decay rate for epsilon
 n_steps = 4  # Number of steps for n-step TD-learning
 num_episodes = 5000
 
-# Initialize Q-table (48 states × 4 actions)
+# Initialize Q-table (16 states × 4 actions for FrozenLake)
 Q = np.zeros((env.observation_space.n, env.action_space.n))
 
 # Track rewards for plotting
@@ -57,6 +59,10 @@ for episode in range(num_episodes):
         if t < T:
             # Take action, observe next state and reward
             next_state, reward, terminated, truncated, _ = env.step(action)
+            
+            # Modify reward to encourage progress
+            if terminated and reward == 0:
+                reward = -1  # Penalize falling into a hole
             episode_reward += reward
             
             # Store transition
@@ -122,10 +128,13 @@ for episode in range(num_episodes):
     
     reward_history.append(episode_reward)
     
+    # Decay epsilon
+    epsilon = max(epsilon_min, epsilon * epsilon_decay)
+    
     # Print progress occasionally
     if (episode + 1) % 500 == 0:
         avg_reward = np.mean(reward_history[-100:])
-        print(f"Episode {episode+1}/{num_episodes}, Average Reward (last 100): {avg_reward:.2f}")
+        print(f"Episode {episode+1}/{num_episodes}, Average Reward (last 100): {avg_reward:.2f}, Epsilon: {epsilon:.3f}")
 
 env.close()
 
@@ -136,15 +145,15 @@ plt.plot(np.convolve(reward_history, np.ones(100)/100, mode='valid'),
          label="100-Episode Moving Average", color='red')
 plt.xlabel("Episode")
 plt.ylabel("Total Reward")
-plt.title(f"Off-Policy n-Step TD Learning (n={n_steps})")
+plt.title(f"Off-Policy n-Step TD Learning (n={n_steps}) on FrozenLake")
 plt.legend()
 plt.grid()
 plt.show()
 
 # Print the optimal policy learned
 optimal_policy = np.array([np.argmax(Q[s]) for s in range(env.observation_space.n)])
-print("Optimal Policy (0=Up, 1=Right, 2=Down, 3=Left):")
-policy_grid = optimal_policy.reshape(4, 12)
+print("Optimal Policy (0=Left, 1=Down, 2=Right, 3=Up):")
+policy_grid = optimal_policy.reshape(4, 4)
 print(policy_grid)
 
 # Visualize the optimal policy
@@ -153,3 +162,8 @@ policy_chars = np.array([[directions[a] for a in row] for row in policy_grid])
 print("\nPolicy Visualization:")
 for row in policy_chars:
     print(' '.join(row))
+
+with open("policy_visualization-frozen.txt", "w", encoding="utf-8") as f:
+    for row in policy_chars:
+        f.write(' '.join(row) + '\n')
+print("\nPolicy visualization saved to 'policy_visualization-frozen.txt'")

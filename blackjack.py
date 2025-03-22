@@ -3,18 +3,20 @@ import gymnasium as gym
 import matplotlib.pyplot as plt
 from collections import deque
 
-# Create the environment
-env = gym.make("CliffWalking-v0")
+# Create the Blackjack environment
+env = gym.make("Blackjack-v1", sab=True)  # Use the "sab" version for Stick-And-Bust rules
 
-# Hyperparameters
-alpha = 0.5  # Learning rate
-gamma = 0.99  # Discount factor
-epsilon = 0.01  # Exploration rate
-n_steps = 4  # Number of steps for n-step TD-learning
-num_episodes = 5000
+# Adjusted Hyperparameters
+alpha = 0.05  # Reduced learning rate for more stable updates
+gamma = 0.95  # Slightly lower discount factor
+epsilon = 1.0  # Initial exploration rate
+epsilon_min = 0.05  # Higher minimum exploration rate to encourage exploration
+epsilon_decay = 0.999  # Slower decay for more exploration
+n_steps = 6  # Increased number of steps for n-step TD-learning
+num_episodes = 10000  # Increased number of episodes for better training
 
-# Initialize Q-table (48 states × 4 actions)
-Q = np.zeros((env.observation_space.n, env.action_space.n))
+# Initialize Q-table
+Q = np.zeros((32, 11, 2, 2))  # Player sum (0-31), dealer card (1-10), usable ace (0/1), actions (stick/hit)
 
 # Track rewards for plotting
 reward_history = []
@@ -57,6 +59,10 @@ for episode in range(num_episodes):
         if t < T:
             # Take action, observe next state and reward
             next_state, reward, terminated, truncated, _ = env.step(action)
+            
+            # Adjust reward to penalize losing more heavily
+            if terminated and reward == 0:
+                reward = -1  # Penalize losing
             episode_reward += reward
             
             # Store transition
@@ -91,7 +97,6 @@ for episode in range(num_episodes):
                 G += (gamma ** n_steps) * np.max(Q[bootstrap_state])
             
             # Calculate importance sampling ratio (for off-policy correction)
-            # Use the ratio of target policy (greedy) to behavior policy (epsilon-greedy)
             rho = 1.0
             for i in range(min(n_steps, T - update_time)):
                 state_i = states[i]
@@ -113,7 +118,7 @@ for episode in range(num_episodes):
             behavior_probs.popleft()
             
             # Off-policy update with importance sampling
-            Q[update_state, update_action] += alpha * rho * (G - Q[update_state, update_action])
+            Q[update_state][update_action] += alpha * rho * (G - Q[update_state][update_action])
         
         if update_time == T - 1:
             break
@@ -122,10 +127,13 @@ for episode in range(num_episodes):
     
     reward_history.append(episode_reward)
     
+    # Decay epsilon
+    epsilon = max(epsilon_min, epsilon * epsilon_decay)
+    
     # Print progress occasionally
     if (episode + 1) % 500 == 0:
         avg_reward = np.mean(reward_history[-100:])
-        print(f"Episode {episode+1}/{num_episodes}, Average Reward (last 100): {avg_reward:.2f}")
+        print(f"Episode {episode+1}/{num_episodes}, Average Reward (last 100): {avg_reward:.2f}, Epsilon: {epsilon:.3f}")
 
 env.close()
 
@@ -136,20 +144,36 @@ plt.plot(np.convolve(reward_history, np.ones(100)/100, mode='valid'),
          label="100-Episode Moving Average", color='red')
 plt.xlabel("Episode")
 plt.ylabel("Total Reward")
-plt.title(f"Off-Policy n-Step TD Learning (n={n_steps})")
+plt.title(f"Off-Policy n-Step TD Learning (n={n_steps}) on Blackjack")
 plt.legend()
 plt.grid()
 plt.show()
 
-# Print the optimal policy learned
-optimal_policy = np.array([np.argmax(Q[s]) for s in range(env.observation_space.n)])
-print("Optimal Policy (0=Up, 1=Right, 2=Down, 3=Left):")
-policy_grid = optimal_policy.reshape(4, 12)
-print(policy_grid)
+# Test the learned policy
+def test_policy(n_tests=100):
+    test_rewards = []
+    
+    for _ in range(n_tests):
+        state, _ = env.reset()
+        total_reward = 0
+        done = False
+        
+        while not done:
+            # Select greedy action
+            action = np.argmax(Q[state])
+            
+            # Take action
+            next_state, reward, terminated, truncated, _ = env.step(action)
+            done = terminated or truncated
+            
+            total_reward += reward
+            state = next_state
+        
+        test_rewards.append(total_reward)
+    
+    print("\nTest Results:")
+    print(f"Average Reward: {np.mean(test_rewards):.2f}")
+    print(f"Test Rewards: {test_rewards}")
 
-# Visualize the optimal policy
-directions = ['L', 'D', 'R', 'U']
-policy_chars = np.array([[directions[a] for a in row] for row in policy_grid])
-print("\nPolicy Visualization:")
-for row in policy_chars:
-    print(' '.join(row))
+print("\nTesting the learned policy...")
+test_policy()
