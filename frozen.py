@@ -8,7 +8,7 @@ env = gym.make("FrozenLake-v1", is_slippery=True, render_mode=None)
 
 # Hyperparameters
 alpha = 0.1  # Learning rate
-gamma = 0.99  # Discount factor
+gamma = 0.95  # Discount factor
 epsilon = 1.0  # Initial exploration rate
 epsilon_min = 0.01  # Minimum exploration rate
 epsilon_decay = 0.995  # Decay rate for epsilon

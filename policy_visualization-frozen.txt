@@ -1,0 +1,4 @@
+L R D U
+L L R L
+U D L L
+L R D L
