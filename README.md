@@ -54,7 +54,7 @@ Implementação de n-step TD-Learning off-policy para ambientes Gymnasium
   <h2>2.4 - Acrobot</h2>
     <img  src="https://gymnasium.farama.org/_images/acrobot.gif" width="300px"/>
     <br>
-    No ambiente Acrobot, o espaço de estados é contínuo e as ações têm espaço discreto, representando aplicar torque negativo, positivo, ou neutro nas juntas. O objetivo é fazer com que a ponta solta da barra ultrapasse a linha na menor quantidade de passos.
+    No ambiente Acrobot, o espaço de estados é contínuo e as ações têm espaço discreto, representando a aplicação de torque negativo, positivo, ou neutro nas juntas. O objetivo é fazer com que a extremidade solta da barra ultrapasse a linha na menor quantidade de passos.
 
 
 <h1>3 - Resultados</h1>
