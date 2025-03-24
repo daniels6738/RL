@@ -73,6 +73,9 @@ Implementação de n-step TD-Learning off-policy para ambientes Gymnasium
 
 
 <h1>Observações finais</h1>
+ O TD Learning Off-Policy funciona bem em ambientes discretos e estruturados (como FrozenLake e Blackjack), mas pode ter dificuldades em cenários com grandes penalizações e estratégias de navegação mais complexas (como CliffWalking).
+
+Ajustes no ε-decay, nas recompensas e na exploração podem melhorar o desempenho em alguns casos.
   
 
 
