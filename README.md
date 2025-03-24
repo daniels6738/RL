@@ -44,11 +44,16 @@ Implementação de n-step TD-Learning off-policy para ambientes Gymnasium
 
 <h1>4 - Experimentos Completos</h1>
   <h2>acrobot</h2>
+  <img  src="https://github.com/user-attachments/assets/df02cc25-6af8-4a29-b28c-542e22aef2ff" width="700px"/>
+  
   <h2>blackjack</h2>
+  <img  src="https://github.com/user-attachments/assets/ed443644-d3c0-43d6-8351-aedb4b6e8485" width="700px"/>
+
   <h2>cliff</h2>
   <img  src="https://github.com/user-attachments/assets/d99d41cd-d6f8-412e-b5c3-7cdff5f676ea" width="700px" />
     
   <h2>frozen</h2>
+  <img  src="https://github.com/user-attachments/assets/fbfc36b3-836c-4343-9317-ce693a4e632c" width="700px"/>
 
 <h1>Cliffwalking</h1>
 
