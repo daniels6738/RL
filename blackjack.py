@@ -4,39 +4,47 @@ import matplotlib.pyplot as plt
 from collections import deque
 
 # Create the Blackjack environment
-env = gym.make("Blackjack-v1", sab=True)  # Use the "sab" version for Stick-And-Bust rules
+env = gym.make("Blackjack-v1", sab=True)
 
 # Adjusted Hyperparameters
-alpha = 0.05  # Reduced learning rate for more stable updates
-gamma = 0.95  # Slightly lower discount factor
+alpha = 0.01  # Smaller learning rate for stability
+gamma = 0.9   # Lower discount factor
 epsilon = 1.0  # Initial exploration rate
-epsilon_min = 0.05  # Higher minimum exploration rate to encourage exploration
-epsilon_decay = 0.999  # Slower decay for more exploration
-n_steps = 6  # Increased number of steps for n-step TD-learning
-num_episodes = 10000  # Increased number of episodes for better training
+epsilon_min = 0.1  # Higher minimum exploration
+epsilon_decay = 0.9995  # Slower decay
+n_steps = 3  # Shorter n-step
+num_episodes = 20000  # More episodes
 
 # Initialize Q-table
-Q = np.zeros((32, 11, 2, 2))  # Player sum (0-31), dealer card (1-10), usable ace (0/1), actions (stick/hit)
+Q = np.zeros((32, 11, 2, 2))  # Player sum, dealer card, usable ace, actions
 
-# Track rewards for plotting
-reward_history = []
+def state_to_index(state):
+    """Convert Blackjack state tuple to indices for Q-table"""
+    player_sum, dealer_card, usable_ace = state
+    return (player_sum, dealer_card, int(usable_ace))
 
 def epsilon_greedy_policy(state):
     """Returns probabilities for each action under epsilon-greedy policy."""
     probs = np.ones(env.action_space.n) * epsilon / env.action_space.n
-    probs[np.argmax(Q[state])] += 1 - epsilon
+    probs[np.argmax(Q[state_to_index(state)])] += 1 - epsilon
     return probs
 
 def greedy_policy(state):
     """Returns probabilities for each action under greedy policy."""
     probs = np.zeros(env.action_space.n)
-    probs[np.argmax(Q[state])] = 1.0
+    probs[np.argmax(Q[state_to_index(state)])] = 1.0
     return probs
 
 def select_action(state, policy_fn):
     """Selects action based on provided policy function."""
     probs = policy_fn(state)
     return np.random.choice(np.arange(len(probs)), p=probs)
+
+# Track metrics
+reward_history = []
+wins = 0
+draws = 0
+losses = 0
 
 # Training loop
 for episode in range(num_episodes):
@@ -47,22 +55,30 @@ for episode in range(num_episodes):
     states = deque([state])
     actions = deque()
     rewards = deque()
-    behavior_probs = deque()  # Store behavior policy probabilities
+    behavior_probs = deque()
     
     # Initial action
     action = select_action(state, epsilon_greedy_policy)
     
-    t = 0  # Time step counter
-    T = float('inf')  # Terminal time (will be updated when episode ends)
+    t = 0
+    T = float('inf')
     
     while True:
         if t < T:
             # Take action, observe next state and reward
             next_state, reward, terminated, truncated, _ = env.step(action)
             
-            # Adjust reward to penalize losing more heavily
-            if terminated and reward == 0:
-                reward = -1  # Penalize losing
+            # Adjust reward structure
+            if terminated:
+                if reward == 1.0:    # Win
+                    wins += 1
+                elif reward == 0.0:   # Draw
+                    draws += 1
+                    reward = 0.0
+                else:                 # Loss
+                    losses += 1
+                    reward = -1.0
+                    
             episode_reward += reward
             
             # Store transition
@@ -70,19 +86,17 @@ for episode in range(num_episodes):
             rewards.append(reward)
             states.append(next_state)
             
-            # Store behavior policy probability for importance sampling
+            # Store behavior policy probability
             behavior_probs.append(epsilon_greedy_policy(state)[action])
             
-            # Check if episode ended
             if terminated or truncated:
                 T = t + 1
             else:
-                # Select next action
                 action = select_action(next_state, epsilon_greedy_policy)
             
             state = next_state
         
-        # Time to update 
+        # Time to update
         update_time = t - n_steps + 1
         if update_time >= 0:
             # Calculate n-step return
@@ -94,9 +108,9 @@ for episode in range(num_episodes):
             # Add bootstrap value if not at terminal state
             if update_time + n_steps < T:
                 bootstrap_state = states[n_steps]
-                G += (gamma ** n_steps) * np.max(Q[bootstrap_state])
+                G += (gamma ** n_steps) * np.max(Q[state_to_index(bootstrap_state)])
             
-            # Calculate importance sampling ratio (for off-policy correction)
+            # Calculate importance sampling ratio
             rho = 1.0
             for i in range(min(n_steps, T - update_time)):
                 state_i = states[i]
@@ -104,21 +118,20 @@ for episode in range(num_episodes):
                 target_prob = greedy_policy(state_i)[action_i]
                 behavior_prob = behavior_probs[i]
                 
-                # Avoid division by zero
                 if behavior_prob > 0:
                     rho *= target_prob / behavior_prob
                 else:
                     rho = 0
                     break
             
-            # Update Q value with importance sampling correction
+            # Update Q value
             update_state = states.popleft()
             update_action = actions.popleft()
             rewards.popleft()
             behavior_probs.popleft()
             
-            # Off-policy update with importance sampling
-            Q[update_state][update_action] += alpha * rho * (G - Q[update_state][update_action])
+            state_idx = state_to_index(update_state)
+            Q[state_idx][update_action] += alpha * rho * (G - Q[state_idx][update_action])
         
         if update_time == T - 1:
             break
@@ -126,32 +139,70 @@ for episode in range(num_episodes):
         t += 1
     
     reward_history.append(episode_reward)
-    
-    # Decay epsilon
     epsilon = max(epsilon_min, epsilon * epsilon_decay)
     
-    # Print progress occasionally
+    # Print progress
     if (episode + 1) % 500 == 0:
         avg_reward = np.mean(reward_history[-100:])
-        print(f"Episode {episode+1}/{num_episodes}, Average Reward (last 100): {avg_reward:.2f}, Epsilon: {epsilon:.3f}")
+        win_rate = wins / (episode + 1)
+        print(f"Episode {episode+1}/{num_episodes}, "
+              f"Avg Reward (last 100): {avg_reward:.2f}, "
+              f"Win Rate: {win_rate:.2%}, "
+              f"Epsilon: {epsilon:.3f}")
 
 env.close()
 
-# Plot rewards over time
-plt.figure(figsize=(10, 5))
-plt.plot(reward_history, label="Episode Reward", alpha=0.6)
-plt.plot(np.convolve(reward_history, np.ones(100)/100, mode='valid'), 
-         label="100-Episode Moving Average", color='red')
+# Plot metrics
+plt.figure(figsize=(12, 5))
+
+# First subplot - Rewards with exponential moving average for smoother curves
+plt.subplot(1, 2, 1)
+# Raw data plot with very low alpha for context
+plt.plot(reward_history, label="Raw Rewards", alpha=0.1, color='blue')
+
+# Multiple moving averages for better visualization
+window_sizes = [100, 500, 1000]
+colors = ['yellow', 'orange', 'red']
+for window, color in zip(window_sizes, colors):
+    moving_avg = np.convolve(reward_history, np.ones(window)/window, mode='valid')
+    plt.plot(range(window-1, len(reward_history)), moving_avg, 
+            label=f'{window}-Episode MA', color=color, linewidth=2)
+
 plt.xlabel("Episode")
-plt.ylabel("Total Reward")
-plt.title(f"Off-Policy n-Step TD Learning (n={n_steps}) on Blackjack")
+plt.ylabel("Reward")
+plt.title("Rewards over Time")
 plt.legend()
-plt.grid()
+plt.grid(True, alpha=0.3)
+
+# Second subplot - Win Rates
+plt.subplot(1, 2, 2)
+window_sizes = [1000, 2000, 5000]
+colors = ['lightgreen', 'green', 'darkgreen']
+
+for window, color in zip(window_sizes, colors):
+    if len(reward_history) > window:
+        # Fixed win rate calculation
+        win_rates = []
+        for i in range(len(reward_history) - window):
+            wins_in_window = sum(1 for r in reward_history[i:i+window] if r > 0)
+            win_rates.append(wins_in_window / window)
+        
+        plt.plot(range(len(win_rates)), win_rates,
+                label=f'{window}-Episode WR', color=color, linewidth=2)
+
+plt.xlabel("Episode")
+plt.ylabel("Win Rate")
+plt.title("Win Rate over Time")
+plt.legend()
+plt.grid(True, alpha=0.3)
+
+plt.tight_layout()
 plt.show()
 
 # Test the learned policy
 def test_policy(n_tests=100):
     test_rewards = []
+    test_wins = 0
     
     for _ in range(n_tests):
         state, _ = env.reset()
@@ -159,13 +210,13 @@ def test_policy(n_tests=100):
         done = False
         
         while not done:
-            # Select greedy action
-            action = np.argmax(Q[state])
-            
-            # Take action
+            action = np.argmax(Q[state_to_index(state)])
             next_state, reward, terminated, truncated, _ = env.step(action)
             done = terminated or truncated
             
+            if terminated and reward == 1.0:
+                test_wins += 1
+                
             total_reward += reward
             state = next_state
         
@@ -173,6 +224,7 @@ def test_policy(n_tests=100):
     
     print("\nTest Results:")
     print(f"Average Reward: {np.mean(test_rewards):.2f}")
+    print(f"Win Rate: {test_wins/n_tests:.2%}")
     print(f"Test Rewards: {test_rewards}")
 
 print("\nTesting the learned policy...")

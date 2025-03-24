@@ -13,7 +13,7 @@ epsilon = 1.0  # Initial exploration rate
 epsilon_min = 0.01  # Minimum exploration rate
 epsilon_decay = 0.995  # Decay rate for epsilon
 n_steps = 4  # Number of steps for n-step TD-learning
-num_episodes = 2000
+num_episodes = 10000
 
 # State space discretization for Acrobot
 # Acrobot has 6 continuous state variables:
