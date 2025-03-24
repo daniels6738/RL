@@ -28,34 +28,49 @@ Implementação de n-step TD-Learning off-policy para ambientes Gymnasium
       experiência:  s,a,r1,s1,a1,r2,s2,a2 
       estimativa:  Qtarget=r1+γ.r2+γ2.Q(s2,a2)∗π(a1|s1)π(a2|s2)/b(a1|s1)b(a2|s2)
 
+  <h2>O que foi implementado?</h2>
+    Nesse projeto fizemos uso de Ordinary Importance Sampling para o aprendizado de ambientes discretos e contínuos em ambientes do Gymnasium.
 
-  <h2>Vamos implementar as variantes do off-policy:</h2>
-    <ul>
-      <li>Ordinary Importance Sampling</li>
-      <li>Weighted Importance Sampling</li>
-      <li>Pesos Truncados</li>
-    </ul>
+  <h1>2 - Sobre os ambientes</h1>
+    Escolhemos os ambientes discretos CliffWalking-v0, FrozenLake-v1 e Blackjack-v1; e escolhemos o ambiente contínuo Acrobot-v1.
+
+  <h2>2.1 - CliffWalking</h2>
+    <img  src="https://gymnasium.farama.org/_images/cliff_walking.gif" width="700px"/>
+    <br>
+    Um personagem começa num local fixo e pode andar por um mapa, seu objetivo é chegar até certo local fixo dando a menor quantidade de passos o possível, "cair" em alguns espaços específicos, o personagem é penalizado e retorna ao início do caminho.
+
+  <h2>2.2 - FrozenLake</h2>
+    <img  src="https://gymnasium.farama.org/_images/frozen_lake.gif" width="300px"/>
+    <br>
+    Similarm ao CliffWalking, mas o personagem pode "escorregar", andando perpendicularmente à direção desejada. No entanto, se o personagem cai em um dos buracos, o episódio termina.
     
-<h1>2 - Lidando com Estados Contínuos</h1>
 
-<h1>3 - Otimizando Parâmetros</h1>
-  <h2>3.1 - Ambiente Discreto</h2>
-  <h2>3.2 - Ambiente Continuo</h2>
+  <h2>2.3 - Blackjack</h2>
+    <img  src="https://gymnasium.farama.org/_images/blackjack.gif" 
+    width="300px"/>
+    <br>
+    Similarmente ao blackjack real, as ações são escolher pegar mais uma carta ou parar, e o objetivo é que o valor total de suas cartas seja mais próximo de 21 que as cartas do Dealer, sem ultrapassar o valor.
 
-<h1>4 - Experimentos Completos</h1>
-  <h2>acrobot</h2>
+  <h2>2.4 - Acrobot</h2>
+    <img  src="https://gymnasium.farama.org/_images/acrobot.gif" width="300px"/>
+    <br>
+    No ambiente Acrobot, o espaço de estados é contínuo e as ações têm espaço discreto, representando aplicar torque negativo, positivo, ou neutro nas juntas. O objetivo é fazer com que a ponta solta da barra ultrapasse a linha na menor quantidade de passos.
+
+
+<h1>3 - Resultados</h1>
+  <h2>Acrobot</h2>
   <img  src="https://github.com/user-attachments/assets/df02cc25-6af8-4a29-b28c-542e22aef2ff" width="700px"/>
   
-  <h2>blackjack</h2>
+  <h2>Blackjack</h2>
   <img  src="https://github.com/user-attachments/assets/ed443644-d3c0-43d6-8351-aedb4b6e8485" width="700px"/>
 
-  <h2>cliff</h2>
+  <h2>CliffWalking</h2>
   <img  src="https://github.com/user-attachments/assets/d99d41cd-d6f8-412e-b5c3-7cdff5f676ea" width="700px" />
     
-  <h2>frozen</h2>
+  <h2>FrozenLake</h2>
   <img  src="https://github.com/user-attachments/assets/fbfc36b3-836c-4343-9317-ce693a4e632c" width="700px"/>
 
-<h1>Cliffwalking</h1>
+
 
 <h1>Observações finais</h1>
   
