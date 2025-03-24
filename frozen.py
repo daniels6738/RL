@@ -162,8 +162,3 @@ policy_chars = np.array([[directions[a] for a in row] for row in policy_grid])
 print("\nPolicy Visualization:")
 for row in policy_chars:
     print(' '.join(row))
-
-with open("policy_visualization-frozen.txt", "w", encoding="utf-8") as f:
-    for row in policy_chars:
-        f.write(' '.join(row) + '\n')
-print("\nPolicy visualization saved to 'policy_visualization-frozen.txt'")
