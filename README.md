@@ -43,8 +43,11 @@ Implementação de n-step TD-Learning off-policy para ambientes Gymnasium
   <h2>3.2 - Ambiente Continuo</h2>
 
 <h1>4 - Experimentos Completos</h1>
-  <h2>Racetrack</h2>
-  <h2>CartPole</h2>
+  <h2>acrobot</h2>
+  <h2>blackjack</h2>
+  <h2>cliff</h2>
+    ![Grafico](graficos/cliffwalking_4-step.png)
+  <h2>frozen</h2>
 
 <h1>Cliffwalking</h1>
 
