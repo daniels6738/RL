@@ -46,7 +46,7 @@ Implementação de n-step TD-Learning off-policy para ambientes Gymnasium
   <h2>acrobot</h2>
   <h2>blackjack</h2>
   <h2>cliff</h2>
-    ![Grafico](graficos/cliffwalking_4-step.png)
+    ![Image](https://github.com/user-attachments/assets/d99d41cd-d6f8-412e-b5c3-7cdff5f676ea)
   <h2>frozen</h2>
 
 <h1>Cliffwalking</h1>
