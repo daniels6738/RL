@@ -30,10 +30,12 @@ Implementação de n-step TD-Learning off-policy para ambientes Gymnasium
 
 
   <h2>Vamos implementar as variantes do off-policy:</h2>
-    * Ordinary Importance Sampling
-    * Weighted Importance Sampling
-    * Pesos Truncados
-
+    <ul>
+      <li>Ordinary Importance Sampling</li>
+      <li>Weighted Importance Sampling</li>
+      <li>Pesos Truncados</li>
+    </ul>
+    
 <h1>2 - Lidando com Estados Contínuos</h1>
 
 <h1>3 - Otimizando Parâmetros</h1>
