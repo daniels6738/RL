@@ -13,20 +13,54 @@ Implementação de n-step TD-Learning off-policy para ambientes Gymnasium
     No TD Learning on-policy, a mesma política é usada tanto para escolher as ações quanto para avaliar a política. Um exemplo é o SARSA.
     
   <h2>Correção no TD Learning Off-Policy</h2>
-    A correção no TD Learning off-policy é feita através de métodos como o Ordinary Importance Sampling e o Weighted Importance Sampling.
-    
-  <h2>Exemplos Simples</h2>
-    Vamos ver exemplos de como essa correção é calculada em episódios pequenos, de 1 até 3 passos.
-    
-  <h3>Ordinary Importance Sampling</h3>
-    Para  n=1 :
-      experiência:  s,a,r1,s1,a1 
-      estimativa:  Qtarget=r1+γ.Q(s1,a1)∗π(a1|s1)/b(a1|s1)
 
-  <h3>Weighted Importance Sampling</h3>
-    Para  n=2 :
-      experiência:  s,a,r1,s1,a1,r2,s2,a2 
-      estimativa:  Qtarget=r1+γ.r2+γ2.Q(s2,a2)∗π(a1|s1)π(a2|s2)/b(a1|s1)b(a2|s2)
+No TD Learning off-policy, a estimativa do valor de uma política é atualizada a partir de trajetórias coletadas por outra política. Para corrigir essa discrepância, devem ser utilizadas técnicas como o Ordinary Importance Sampling e o Weighted Importance Sampling.
+
+A chave para essa correção é o fator de importância (rho, ρ), definido como a razão entre a probabilidade de uma sequência de ações sob a política alvo (π) e sob a política de comportamento (b):
+
+
+$ρ_t = \frac{\pi(a_t|s_t)}{b(a_t|s_t)}$
+
+
+Quando temos uma trajetória de n passos, o peso acumulado é o produto dos fatores de importância ao longo dos passos:
+
+
+$ρ = \prod_{t=1}^{n} \frac{\pi(a_t|s_t)}{b(a_t|s_t)}$
+
+
+Esse fator é fundamental porque ajusta a contribuição das amostras geradas pela política de comportamento para refletirem corretamente a política alvo. Quando a política alvo e a de comportamento são muito diferentes, os valores de ρ podem variar drasticamente, tornando o aprendizado instável. O Weighted Importance Sampling resolve esse problema normalizando os pesos acumulados.
+
+<h2>Exemplos Simples</h2>
+
+Abaixo estão exemplos de como essa correção é calculada para diferentes valores de n.
+
+<h3>Ordinary Importance Sampling (n=1)</h3>
+
+Para um episódio de um passo:
+- Experiência: $( s, a, r_1, s_1, a_1 )$
+- Estimativa: $Q_{target} = r_1 + \gamma Q(s_1, a_1) \cdot \frac{\pi(a_1|s_1)}{b(a_1|s_1)}$
+
+
+<h3>Weighted Importance Sampling (n=2)</h3>
+
+Para um episódio de dois passos:
+- Experiência: $( s, a, r_1, s_1, a_1, r_2, s_2, a_2 )$
+- Estimativa:
+$Q_{target} = r_1 + \gamma r_2 + \gamma^2 Q(s_2, a_2) \cdot \frac{\pi(a_1|s_1) \pi(a_2|s_2)}{b(a_1|s_1) b(a_2|s_2)}$
+
+
+O Weighted Importance Sampling normaliza esse peso para reduzir a variabilidade excessiva e melhorar a estabilidade do aprendizado.
+
+<h2>Resumo</h2>
+- On-Policy (ex: SARSA): A política que escolhe as ações é a mesma que está sendo avaliada.<br>
+- Off-Policy (ex: Q-Learning, TD Off-Policy): A política que coleta experiências é diferente da política alvo.<br>
+- Correção via Importance Sampling: Ajusta as atualizações de Q para refletirem a política alvo corretamente.<br>
+- Rho (ρ) é o fator de ajuste: Ele compensa as diferenças entre as probabilidades das políticas de comportamento e alvo.<br><br>
+
+Esses conceitos garantem que o aprendizado ocorra de forma eficaz, mesmo quando a política de comportamento é diferente da política alvo.
+
+
+
 
   <h2>O que foi implementado?</h2>
     Nesse projeto fizemos uso de Ordinary Importance Sampling para o aprendizado de ambientes discretos e contínuos em ambientes do Gymnasium.
