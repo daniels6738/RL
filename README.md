@@ -52,10 +52,10 @@ $Q_{target} = r_1 + \gamma r_2 + \gamma^2 Q(s_2, a_2) \cdot \frac{\pi(a_1|s_1) \
 O Weighted Importance Sampling normaliza esse peso para reduzir a variabilidade excessiva e melhorar a estabilidade do aprendizado.
 
 <h2>Resumo</h2>
-- On-Policy (ex: SARSA): A política que escolhe as ações é a mesma que está sendo avaliada.<br>
-- Off-Policy (ex: Q-Learning, TD Off-Policy): A política que coleta experiências é diferente da política alvo.<br>
-- Correção via Importance Sampling: Ajusta as atualizações de Q para refletirem a política alvo corretamente.<br>
-- Rho (ρ) é o fator de ajuste: Ele compensa as diferenças entre as probabilidades das políticas de comportamento e alvo.<br><br>
+- <b>On-Policy (ex: SARSA)</b>: A política que escolhe as ações é a mesma que está sendo avaliada.<br>
+- <b>Off-Policy (ex: Q-Learning, TD Off-Policy)</b>: A política que coleta experiências é diferente da política alvo.<br>
+- <b>Correção via Importance Sampling</b>: Ajusta as atualizações de Q para refletirem a política alvo corretamente.<br>
+- <b>Rho (ρ) é o fator de ajuste</b>: Ele compensa as diferenças entre as probabilidades das políticas de comportamento e alvo.<br><br>
 
 Esses conceitos garantem que o aprendizado ocorra de forma eficaz, mesmo quando a política de comportamento é diferente da política alvo.
 
@@ -107,9 +107,11 @@ Esses conceitos garantem que o aprendizado ocorra de forma eficaz, mesmo quando 
 
 
 <h1>Observações finais</h1>
- O TD Learning Off-Policy funciona bem em ambientes discretos e estruturados (como FrozenLake e Blackjack), mas pode ter dificuldades em cenários com grandes penalizações e estratégias de navegação mais complexas. Por exemplo no Acrobot o aprendizado demorou um pouco para começar.
+ O TD Learning Off-Policy funciona bem em ambientes discretos e estruturados (como CliffWalking e Blackjack), mas pode ter dificuldades em cenários com grandes penalizações e estratégias de navegação mais complexas. O uso de bootstrapping n-step permitiu um aprendizado rápido na maioria dos casos, mas o aprendizado demorou um pouco para começar no Acrobot.<br><br>
 
-Ajustes no ε-decay, nas recompensas e na exploração podem melhorar o desempenho em alguns casos.
+ 
+ A estratégia também demonstrou instabilidade em alguns casos, tal como o FrozenLake, em que algumas execuções o personagem raramente chegava ao objetivo.
+Ajustes no ε-decay, nas recompensas e na taxa de aprendizagem podem melhorar o desempenho em futuros testes.
   
 
 
