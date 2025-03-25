@@ -14,10 +14,9 @@ Implementação de n-step TD-Learning off-policy para ambientes Gymnasium
     
   <h2>Correção no TD Learning Off-Policy</h2>
 
-No TD Learning off-policy, a estimativa do valor de uma política é atualizada a partir de trajetórias coletadas por outra política. Para corrigir essa discrepância, devem ser utilizadas técnicas como o Ordinary Importance Sampling e o Weighted Importance Sampling.
-
-A chave para essa correção é o fator de importância (rho, ρ), definido como a razão entre a probabilidade de uma sequência de ações sob a política alvo (π) e sob a política de comportamento (b):
-
+No TD Learning off-policy, a estimativa do valor de uma política é atualizada a partir de trajetórias coletadas por outra política. Isso é útil quando queremos aprender uma política ótima, mas os dados vêm de uma política exploratória diferente (como um agente que tenta ações aleatórias para coletar mais informações sobre o ambiente).
+<p>O problema principal é que a distribuição das ações na política de comportamento (b) pode ser muito diferente da política alvo (𝜋), o que pode levar a atualizações enviesadas.</p> <p>Para corrigir essa discrepância, utilizamos <b>Importance Sampling</b>, que ajusta a contribuição das amostras para refletirem corretamente a política alvo.</p>
+A chave para essa correção é o <b>fator de importância</b> (ρ), definido como a razão entre a probabilidade de uma sequência de ações sob a política alvo (π) e sob a política de comportamento (b):
 
 $ρ_t = \frac{\pi(a_t|s_t)}{b(a_t|s_t)}$
 
@@ -29,6 +28,7 @@ $ρ = \prod_{t=1}^{n} \frac{\pi(a_t|s_t)}{b(a_t|s_t)}$
 
 
 Esse fator é fundamental porque ajusta a contribuição das amostras geradas pela política de comportamento para refletirem corretamente a política alvo. Quando a política alvo e a de comportamento são muito diferentes, os valores de ρ podem variar drasticamente, tornando o aprendizado instável. O Weighted Importance Sampling resolve esse problema normalizando os pesos acumulados.
+
 
 <h2>Exemplos Simples</h2>
 
